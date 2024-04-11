@@ -1,0 +1,8 @@
+\begin{tikzpicture}[node distance=1.5cm]
+   \node (start) [startstop] {Start};
+   \node (in1) [io, below of=start] {Input};
+   \node (pro1) [process, below of=in1] {Process 1}; 
+   \draw [arrow] (start) -- (in1);
+   \draw [arrow] (in1) -- (pro1);
+   \draw [arrow] (pro1.east) -- ++(1.5,0) |- (start);
+\end{tikzpicture}

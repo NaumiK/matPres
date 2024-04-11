@@ -1,0 +1,379 @@
+%%%%%%%%%%%Информация о пакете%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{mybeamer}[2023/06/17 The style file for beamer class to KK]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usetheme{Berlin}
+
+%%%%%%%%%%%Передача параметров в пакет%%%%%%%%%%%%%%%%%
+\RequirePackage{kvoptions}%  <-- пакет для передачи параметров, обёртка
+% Попробуем изменять логотип при помощи параметра
+\SetupKeyvalOptions{%  <-- подготавливаем параметры
+    family=KVCSC,
+    prefix=KVCSC@
+}
+\DeclareBoolOption{darktherm}
+\DeclareStringOption[templatemedia/images/blue_logo.png]{logo}[templatemedia/images/rb_logo.png]%  <-- декларируем случай без аргументов, key без value и итог
+\DeclareBoolOption{useprogressbar}
+% \usepackage{cscbeamer} <=> \usepackage[]{cscbeamer} <=> \usepackage[logo=blue_logo.png]{cscbeamer};
+% \usepackage[logo]{cscbeamer} <=> \usepackage[logo=rb_logo.png]{cscbeamer}.
+\ProcessKeyvalOptions*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcommand    -> \providecommand
+% \usepackage    -> \RequirePackage
+% \documentclass -> \LoadClass
+\providecommand{\CSC}{Computer Science Center}
+
+\RequirePackage{ifthen}
+% Поработаем с цветами
+\RequirePackage{xcolor} % <-- определяем цвета
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% define colors (green -- for structure and gray -- for titles)
+% \definecolor{cscgreen}{RGB}{7, 195, 159}
+% \definecolor{titlegray}{RGB}{89, 89, 89}
+% \setbeamercolor{title}{fg=titlegray}
+% \setbeamercolor{frametitle}{fg=titlegray}
+% \setbeamercolor{structure}{fg=cscgreen}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% define colors (green -- for structure and gray -- for titles)
+\definecolor{cscgreen}{HTML}{07c39f} % основной цвет выделения
+\definecolor{cscorange}{HTML}{f59d20} % доп цвет выделения
+\definecolor{cscblue}{HTML}{057aba} % доп цвет выделения 
+% тёмная тема
+\definecolor{cscdarkback}{HTML}{1c1c1c} % бекграунд
+\definecolor{csclightcolor}{HTML}{ced8dd} % подзаголовок и тп
+% светлая тема
+\definecolor{csclightback}{HTML}{ecf0f2} % бекграунд
+\definecolor{cscdarkcolor}{HTML}{8899a4} % подзаголовок и тп
+\setbeamertemplate{section in toc shaded}[default][100]
+\setbeamertemplate{subsection in toc shaded}[default][100]
+
+\def\th@warning{%
+  \normalfont%
+  \setbeamercolor{block header warning}{bg=cscorange, fg=csclightcolor}%
+  \setbeamercolor{block body warning}{bg=cscorange!20, fg=black!60}%
+  \def\inserttheoremblockenv{warningblock}%
+  }
+
+\ifKVCSC@darktherm\relax % в зависимости от темы (светлая или тёмная) выставляем основные цвета)
+    \setbeamercolor{background canvas}{bg=cscdarkback}
+    \setbeamercolor{title}{fg=white}
+    \setbeamercolor{frametitle}{fg=white}
+    \setbeamercolor{framesubtitle}{fg=csclightcolor}
+    \setbeamercolor{normal text}{fg=white}
+    \setbeamercolor{page number}{fg=csclightcolor}
+    \setbeamercolor{section in toc shaded}{fg=cscdarkback!60!cscgreen}
+    \setbeamercolor{subsection in toc shaded}{fg=cscdarkback!60!white}
+    \setbeamercolor{block body}{bg=csclightback, fg=black!60}
+\else
+    \setbeamercolor{background canvas}{bg=csclightback}
+    \setbeamercolor{title}{fg=black}
+    \setbeamercolor{frametitle}{fg=black}
+    \setbeamercolor{framesubtitle}{fg=cscdarkcolor}
+    \setbeamercolor{normal text}{fg=black}
+    \setbeamercolor{page number}{fg=cscdarkcolor}
+    \setbeamercolor{section in toc shaded}{fg=csclightback!60!cscgreen}
+    \setbeamercolor{subsection in toc shaded}{fg=csclightback!60!black}
+\fi
+\setbeamercolor{structure}{fg=cscgreen}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\providecommand{\ccsc}{\color{cscgreen}}
+% {\ccsc ...} <=> \cccsc{...}
+\providecommand{\cccsc}[1]{{\color{cscgreen} #1}}
+
+
+%%%%%%%%%%%Длины%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Абсолютные значения
+% pt  | points          ~0.35mm
+% mm  | millimeter      ~2.84pt
+% cm  | centimeter      ~2.84pt, 10mm
+% in  | inch            ~72.27pt, 25.4mm
+% Относительные значения (+ \huge, \small, ...)
+% em  | ~'M'
+% ex  | ~'x'
+% Арифметика с длинами 
+% Можно домножать: 0.5\textwidth
+% Нельзя использовать '+', '-', '*', '/'
+% Это возможно сделать с помощью команды "\dimexpr": \dimexpr\textwidth - 30pt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\ifnot#1{#1\else\expandafter\expandafter\fi\iffalse\iftrue\fi} % <-- нам понадобится инверсия условия if. См https://tex.stackexchange.com/questions/108911/negating-ifeof
+\def\ifnottitle#1{\ifnot{\ifnum\insertframenumber=1}\relax#1\fi} % на первом слайде (где заголовок) не используем многие элементы
+
+%%%%%%%%%%%Титул%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\csc@titlefontmodificator{\fontsize{32}{40}\selectfont}
+\setbeamerfont{title}{size=\csc@titlefontmodificator}
+\newif\ifsupressfootnote % <-- не показывать футнот
+\newif\ifsupressprogressbar % <-- не показывать прогресс-бар
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% заголовки и подзаголовки %%%
+% https://tex.stackexchange.com/questions/415621/how-to-customize-the-frame-title-subtitle-main-text-in-terms-of-position-and?rq=1
+\def\csc@insertframetitle{\insertframetitle}
+\def\csc@insert@frametitle{% < --- как будем заголовок печатать
+    \usebeamerfont{frametitle}\strut\csc@insertframetitle%
+    % \space|\the\section@start@slide$\to$\the\section@end@slide|% <-- (debug) для наглядности смотрим, где начало и конец секции
+    \strut\par%
+}
+\def\csc@insert@framesubtitle{%  < -- как будем подзаголовок печатать
+    \ifnot{\ifx\insertframesubtitle\@empty}\relax%
+        \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle%
+        \strut\par\vspace{5pt}%
+    \fi%
+}
+\setbeamertemplate{frametitle}{%  <-- компонуем заголовок и подзаголовок
+    \vspace{0.5\beamer@leftmargin}%  <-- отходим от края
+    \csc@insert@frametitle%
+    \csc@insert@framesubtitle%
+    \vspace{-10pt}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%Хедер%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Сделаем линейку сверху: \rule{ширина}{высота}
+\newdimen\rule@length
+\rule@length=\paperwidth%
+\ifKVCSC@useprogressbar % используем ли прогресс-бар по верху страницы
+    \setbeamertemplate{headline}{%
+    \immediate\update@section@counters% <-- обновляем номера, где начинаются секции (если надо)
+    \immediate\set@sectionprogress@length% <-- обновляем длину прогрессбара
+        \ifnottitle{%
+        \smash{%
+            \ifnot{\ifsupressprogressbar}%
+                \lower0.1cm\hbox{%
+                    {%
+                        \color{cscgreen}%
+                        \rule{\rule@length}{0.1cm}% пускаем линейку
+                    }%
+                }%
+            \fi%
+        }}%
+    }
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Отключим символы навигации
+\setbeamertemplate{navigation symbols}{}
+\providecommand{\logoname}{\KVCSC@logo}
+
+% Добавим глобальные переменные, работу с ними (добавим заметки)
+\def\gnewcommand{\g@star@or@long\new@command}
+\def\grenewcommand{\g@star@or@long\renew@command}
+\def\g@star@or@long#1{% 
+  \@ifstar{\let\l@ngrel@x\global#1}{\def\l@ngrel@x{\long\global}#1}} 
+  
+\newcommand{\csc@footnote}{}
+\newcommand{\cscfootnote}[1]{%
+    \grenewcommand{\csc@footnote}{% 
+        #1
+    }%
+}
+
+%%%%%%%%%%%О боксах и клее%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Бокс --- любой объект, в latex: текст, изображение и т.д. "Коробки" связываются между собой клеем. Склеенные боксы --- бокс. символ -> слово -> предложение -> параграф -> страница
+% Параметры бокса: высота, глубина, ширина
+% Боксы: горизонтальные(ширина) -- hbox, вертикальные(глубина, высота) -- vbox; Г-Г, В-В.
+% Пример: \hbox to -1pt{/} (отрицательные длины тоже возможны)
+% Надстройки в LaTeX: \mbox{...} --- "горизонтальный" бокс; 
+% \makebox[#1][#2]{...}: #1 --- длина бокса, #2 --- выравнивание внутри бокса
+% \parbox[#1][#2]{#3}{...} (отвечает за параграф): #1 --- выравнивание внутри бокса, #2 --- высота бокса, #3 --- ширина бокса
+% \raisebox{#1}[#2][#3]{...} ("подъемный бокс": нулевая длина, глубина, ширина --- ничего не двигаем): #1 --- насколько поднимаем, #2 --- высота бокса, #3 --- глубина бокса
+
+% Клей и кёрны
+% Клей связывает боксы, для клея можно выставлять некоторые параметры --- они предоставляют нам функционал по размещению боксов. Например, между боксами можно проставить пробелы.
+% Клей: конечный, бесконечный
+% В нашем примере используем бесконечный клей \hfill, конечный клей \hspace{...} (\hskip в TeX)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Итак, попытаемся ограничить нашу заметку в утере
+
+%%%%%%%%%%%Футер%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{footline}{%
+    \usebeamercolor[fg]{page number in head/foot}%
+    \usebeamerfont{page number in head/foot}%
+    \hspace{10pt}\includegraphics[width=1.5cm]{\logoname}%  <-- добавим логотип
+    \hfill%
+    \raisebox{0em}[0pt] {%  <-- бокс считается нулевой высоты и глубины, а значит идёт по нижнему краю
+        \parbox[b]{10cm}{%  <-- parbox создаёт ограничение в длину и привязку к нижнему краю
+            \centering%   <-- центрирование 
+            \csc@footnote%  <-- запишем заметку, если она есть
+        }
+    }
+    \hfill
+    \makebox[30pt][r] {%  <-- "right" --- текст будет смещён вправо
+    \ifthenelse{\equal{\insertframenumber}{1}}{%
+    }{%
+        \insertframenumber\,/\,\inserttotalframenumber% <-- добавим номер страницы
+    }%
+    \hspace{10pt}}%
+    \vspace{2pt}%
+    \cscfootnote{}%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%Заголовок%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{frametitle}{%
+    \usebeamerfont{frametitle}\strut\insertframetitle\strut\par%  <-- добавляем заголовок
+    % Сравним макросы
+    \ifx\insertframesubtitle\@empty%
+    \else%
+    {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\strut\par}%  <-- добавляем подзаголок
+    \fi%
+    \vspace{-10pt}%  <-- поднимаем черточку с помощью конечного клея
+    {\color{cscgreen}%
+        \par\noindent\rule{\textwidth}{0.4pt}%  <-- рисуем черточку
+    }
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%Моды%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1. Vertical mode (главный вертикальный список, из которого получаются страницы);
+% 2. Internal vertical mode (вертикальный список для vbox);
+% 3. Horizontal mode (горизонтальный список для параграфов);
+% 4. resticted horizontal mode (горизонтальный списко для hbox);
+% 5. math mode (математическая формула внутри горизонтального списка);
+% 6. display math mode (математическая формула на отдельной строке, прерывание параграфа).
+% комментарии важно вставлять после каждой команды в стилевом файле (здесь это активно практикуется): мы находимся в горизонтальном моде --- "%" позволяет избежать ненужных пробелов
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%Соглашение о наименовании%%%%%%%%%%%%%%%%%%%
+% Для пользователей --- lowcase и короткое имя: \section, \times, \emph, ...
+% Для создания других пакетов --- CamelCase: \InputIfFileExists, \RequirePackage, ...
+% Приватные команды --- "@": \@tempcnta, \@ifnextchar, \@eha, ... . Использование в ".tex": \makeatletter, <usecommand>, \makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%Создание команд%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% В TeX для создания команд используется \def
+% \def\<имя> #1#2 ... {...}
+% При помощи этой конструкции можно парсить параметры:
+% \def\parseLine #1, #2 \par {arg1: '#1' arg2: '#2'}  %  <-- принимает первый аргумент до ", ", второй аргумент до нового параграфа
+% \parseLine Hello ,,, World  %  <-- arg1: "Hello ,,", arg2: "World "
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Напишем сокращение ссылок
+\RequirePackage{url}
+
+\def\i@github https://github.com#1 {#1}%  <-- https://github.com/x/y -> /x/y
+
+\newcommand{\github}[1]{%  <-- берёт параметром полный url
+    \includegraphics[width=1em,height=1em,keepaspectratio]{free-icon-github-2111432.png}%  <-- отобразим иконку
+    \url{\i@github #1 }%  <-- отобразим окончание
+}
+
+
+%%%% пробуем определить, где идут секции и где они заканчиваются, а так же графически изобразить прогресс
+% проблема: TeX не имеет информации о будущих страницах. Надо эту информацию сохранять в отдельном запуске (как с библиографией, например)
+% алгоритм:
+% 1. поймём, как "подвязаться" к команде создания секции
+% 2. при вызове секции сохраним инфу о нормере слайда в файл 
+% 3. прочитаем файл в отдельную переменную при новом запуске
+% 4. когда надо будем обновлять информацию: какой номер начинает текущую секцию, где она заканчивается
+% 5. на основе этого и текущего слайда определим длину "прогрессбара"
+
+%% 1. 
+\ifKVCSC@useprogressbar
+    \let\old@section=\beamer@section        % <--- вместо "секции" задаём новую команду, которая выводит секцию но в дополнении дописывает файл
+    
+    %% 2. записываем в файл 
+    \newwrite\sectionfile@writer
+    \openout\sectionfile@writer=\jobname.secw\relax
+    
+    \long\def\beamer@section[#1]#2{% <-- нотацию узнаём благодаря \expandmacros
+        \old@section[#1]{#2}\relax% <-- сначала выполняем основную команду
+        \immediate\write\sectionfile@writer{\insertframenumber}% <-- но потом ещё пишем в файл номер слайда
+    }
+    
+    %% 3. теперь научимся из файла читать и сохраним всё в регистр
+    \newtoks\sections@list% <---- регистр, в котором будут храниться информация о существующих секциях
+    \newread\sectionfile@reader
+    \openin\sectionfile@reader=\jobname.secw\relax
+    
+    \def\readallsections{%
+        \def\stopread{\par }% <-- в файле последняя строка пустая, мы хотим её игнорировать
+        \loop\relax% <-- начинаем цикл
+        \ifnot{\ifeof\sectionfile@reader}\relax%  <-- если ещё не достигли конца файла, можно работать
+        \read\sectionfile@reader to\newline% <-- записываем значение на этой строке в переменную
+            \ifx\newline\stopread\relax%  <-- если получили '\par ', значит дальше ничего нет
+                \def\newline{-1\space}%  <-- впишем вместо '\par ' '-1 '. Чтобы не обрабатывать нечисла
+            \fi\relax%
+            \edef\tempa{\the\sections@list\newline}% <-- edef значит, что мы значала раскрываем полностью содержимое внутри, а потом уже создаём макрос. Тут мы добавляем к существующему набору списка секций новую https://tex.stackexchange.com/questions/38067/how-does-one-append-material-to-a-token-list
+            \sections@list=\expandafter{\tempa}%  <-- пишем получившееся в регистр. Без \expandafter мы бы не раскрывали \tempa и в итоге бы получили содержимое просто '\tempa'
+        \repeat\relax%
+    }
+    \readallsections% <-- сразу прочитаем все секции.
+    
+    %% 4. создадим возможность парсить прочитанное
+    \newcount\section@start@slide% <-- где текущая секция начинается
+    \newcount\section@end@slide% <-- где текущая секция заканчивается
+    \section@start@slide=1
+    \section@end@slide=-1
+    
+    \def\spit@head@section#1 #2\relax{% <-- в нашем регистре хранится строка вида '3 8 11 -1 '. Этой функцией мы хотим отделить '3' и положить её в счётчик, а оставшиеся '8 11 -1 ' записать обратно в регистр
+        \def\a{#1}%
+        \ifnot{\ifx\a\@empty}%
+            \global\section@end@slide=#1% <-- кладём первое число в счётчик
+            \ifx\relax#2\relax% <-- если #2=\relax, то строка кончилась. 
+                \global\sections@list=\expandafter{-1 \space}% <-- тогда запишем для общности в регистр '-1 '
+            \else\relax% <-- ещё не кончилось
+                \global\sections@list=\expandafter{#2}% <-- записываем хвост в регистр 
+            \fi\relax%
+            \ifnum\section@end@slide=-1\relax% <-- сразу переформируем. Если конец секции в -1, на самом деле оно идёт до конца слайдов
+                \global\section@end@slide=\numexpr \inserttotalframenumber + 1\relax%
+            \fi\relax%
+        \fi%
+    }
+    
+    \def\getnext@section@slidenumber{% <-- головная функциея, которая будет отделять первое число в списке секций от оставшихся
+        \edef\tempa{\the\sections@list}% <-- обозначаем список
+        \ifnot{\ifx\tempa\empty}\relax% <-- если что-то там есть
+            \expandafter\spit@head@section\tempa\relax%<-- то запускаем функцию выше
+        \fi\relax%
+    }
+    
+
+    \def\update@section@counters{% <-- обновляем информацию о секции при каждом слайде
+        \ifnum\section@end@slide=-1\relax% <-- граничное условия
+            \ifnum\inserttotalframenumber=1\relax% <-- возникает при самом первом запуске команды, например
+                \global\section@end@slide=1\relax%
+            \else%
+                \global\section@end@slide=\numexpr \inserttotalframenumber + 1\relax%
+            \fi%
+        \fi\relax%
+        \ifnot{\ifnum\insertframenumber<\section@end@slide}\relax% <-- если текущий слайд больше или равен слайду, где заканчивается текущая секция, значит пора обновит информацию!
+            \getnext@section@slidenumber% <-- получаем где заканчивается новая секция 
+            \global\section@start@slide=\insertframenumber% <-- ну а начинается она прям тут
+        \fi\relax
+    }
+    \update@section@counters% <-- сразу же узнаём, где стартует первая секция 
+    
+    
+    %% 5.  вычислим длину прогрессбара
+    \def\set@sectionprogress@length{% <-- арифметика такая. Если секция начинается в a, а следующая за ней начинается в b, при этом текущий слайд d...
+    % длина прогрессбара будет <basic>/(b-a) * (d-1-a)
+        \ifnum\section@start@slide>1\relax%
+            \rule@length=\paperwidth%
+            \newcount\thisposprogressbar%
+            \thisposprogressbar=\numexpr\insertframenumber +1 - \the\section@start@slide\relax%
+            \newcount\thatposprogressbar%
+            \thatposprogressbar=\numexpr\the\section@end@slide - \the\section@start@slide\relax%
+            \ifnot{\ifnum\thatposprogressbar>0}% <-- когда запускаем первый раз и ещё некорректно считаем "количество всех слайдов"
+                \global\thatposprogressbar=1%
+            \fi
+            \divide\rule@length by \thatposprogressbar%
+            \multiply\rule@length by \thisposprogressbar%
+        \else%
+            \rule@length=0pt
+        \fi%
+    }
+\else
+    \newwrite\sectionfile@writer
+    \openout\sectionfile@writer=\jobname.secw\relax
+    \closeout\sectionfile@writer
+\fi
+

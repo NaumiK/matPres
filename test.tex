@@ -1,0 +1,95 @@
+\documentclass[10pt]{article}
+\input{config.tex}
+\input{preamble/packages.tex}
+\input{preamble/xelatexs.tex}
+\input{preamble/flowcharts.tex}
+\input{preamble/beamer.tex}
+\input{preamble/settings.tex}
+
+\begin{document}
+\pagestyle{empty}
+\makebox[\textwidth][c] {
+    \begin{tikzpicture}[node distance=3cm,on grid,auto,thick]
+        % \node[con_act, initial, initial text=\( \square \)](init){Активируется каждый раз};
+        % \node[status](wait_ui) at (0, -1){Ожидание UI};
+        \node[](init_1) {\( \square \)};
+        % \node[below=1cm of init_1](init) {\tiny \underline{Активируется каждый раз}};
+        \node[con_act, below=1.2cm of init_1](init){Каждый раз};
+        \node[status, below=1.2cm of init](wait_ui){Ожидание UI};
+
+        \node[con_act, above of=wait_ui](get_change){Нажата кнопка возврата \nodepart{lower} Возврат средств, вывод приветственного окна};
+
+        \node[con_act, left=5cm of wait_ui](coin_receiver){Нажат монетоприемник};
+        \node[status, below left of=coin_receiver](wait_coin){Ожидание оплаты (монеты)};
+        \node[con_act, below of=wait_coin](coin_dialog){Выбор варианта \nodepart{lower} Зачисление на счёт};
+        \node[con_act, right of=wait_coin](coin_dialog_close){"Закрыть"};
+
+        \node[con_act, right of=wait_ui](money_receiver){Нажат купюроприемник};
+        \node[status, below right of=money_receiver](wait_money){Ожидание оплаты (купюры)};
+        \node[con_act, below of=wait_money](money_dialog){Выбор варианта \nodepart{lower} Зачисление на счёт};
+        \node[con_act, left of=wait_money](money_dialog_close){"Закрыть"};
+
+        \node[con_act, below of=wait_ui](key_is_pressed_first){Нажата кнопка с клавиатуры \nodepart{lower} Вывод набираемого id};
+        \node[status, below of=key_is_pressed_first](keyboard_input){Набор с клавиатуры};
+        \node[con_act, right of=keyboard_input](key_is_pressed){Нажата кнопка, id не набран \nodepart{lower} Изменяем id};
+
+        \node[con_act, below right of=keyboard_input](key_is_pressed_last_ok){\( \exists \text{id} \land \text{набрана сумма} \) \nodepart{lower} "Ваш напиток готовится"};
+        \node[con_act, below left of=keyboard_input](key_is_pressed_last_not_ok){\( \lnot (\exists \text{id} \land \text{набрана сумма}) \)};
+
+        \node[status, below of=key_is_pressed_last_ok](drink_is_cooking){Приготовление напитка};
+        \node[con_act, right of=drink_is_cooking](animation_done){Напиток приготовлен \nodepart{lower} Сброс id, "Наслаждайтесь напитком"};
+        \node[status, above of=animation_done](drink_is_cooked){Забрать товар};
+        \node[con_act, right of=wait_money](drink_picked_up){Напиток взяли \nodepart{lower} Вывод счёта};
+        \path[->]   (init_1)                    edge (init)
+                    (init)                      edge (wait_ui)
+                    (wait_ui)                   edge (coin_receiver)
+                                                edge (money_receiver)
+                                                edge (key_is_pressed_first)
+                                                edge [bend left=85] (get_change)
+                    (get_change)                edge [bend left=85] (wait_ui)
+                    (coin_receiver)             edge (wait_coin)
+                    (wait_coin)                 edge [bend right] (coin_dialog)
+                                                edge (coin_dialog_close)
+                    (coin_dialog)               edge [bend right] (wait_coin)
+                    (coin_dialog_close)         edge (wait_ui)
+
+                    (money_receiver)            edge (wait_money)
+                    (wait_money)                edge [bend right] (money_dialog)
+                                                edge (money_dialog_close)
+                    (money_dialog)              edge [bend right] (wait_money)
+                    (money_dialog_close)        edge (wait_ui)
+                    (key_is_pressed_first)      edge (keyboard_input)
+                    (keyboard_input)            edge [bend left] (key_is_pressed)
+                                                edge (key_is_pressed_last_ok)
+                                                edge (key_is_pressed_last_not_ok)
+                    (key_is_pressed)            edge [bend left] (keyboard_input)
+                    (key_is_pressed_last_not_ok)edge [bend left] (wait_ui)
+                    (key_is_pressed_last_ok)    edge (drink_is_cooking)
+                    (drink_is_cooking)          edge (animation_done)
+                    (animation_done)            edge (drink_is_cooked)
+                    (drink_is_cooked)           edge [bend right] (drink_picked_up)
+                    (drink_picked_up)           edge [bend right=60] (wait_ui);
+    \end{tikzpicture}
+}
+%                           &                                                            &                                                    &                        \\
+\begin{tabularx}{\textwidth}{X|X|X|X}
+Текущее состояние           &Условие                                                     &Действие                                            &Следующее состояние     \\
+    \hline
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Начальное состояние         &Каждый раз                                                  &                                                    &Ожидание UI             \\
+Ожидание UI                 &Нажат монетоприемник                                        &                                                    &Ожидание оплаты (монеты)\\
+Ожидание оплаты (монеты)    &Выбор варианта                                              &Зачисление на счёт                                  &Ожидание оплаты (монеты)\\
+Ожидание оплаты (монеты)    &"Закрыть"                                                   &                                                    &Ожидание UI             \\
+Ожидание UI                 &Нажат купюроприемник                                        &                                                    &Ожидание оплаты (купюры)\\
+Ожидание оплаты (купюры)    &Выбор варианта                                              &Зачисление на счёт                                  &Ожидание оплаты (купюры)\\
+Ожидание оплаты (купюры)    &"Закрыть"                                                   &                                                    &Ожидание UI             \\
+Ожидание UI                 &Нажата кнопка возврата                                      &Возврат средств, вывод приветственного окна         &Ожидание UI             \\
+Ожидание UI                 &Нажата кнопка с клавиатуры                                  &Вывод набираемого id                                &Набор с клавиатуры      \\
+Набор с клавиатуры          &Нажата кнопка, id не выбран                                 &Изменяем id                                         &Набор с клавиатуры      \\
+Набор с клавиатуры          & \( \lnot (\exists \text{id} \land \text{набрана сумма}) \) &                                                    &Ожидание UI             \\
+Набор с клавиатуры          & \( \exists \text{id} \land \text{набрана сумма} \)         &"Ваш напиток готовится"                             &Приготовление напитка   \\
+Приготовление напитка       &Напиток приготовлен                                         &Сброс id, "Наслаждайтесь напитком"                  &Забрать товар           \\
+Забрать товар               &Напиток взяли                                               &Вывод счёта                                         &Ожидание UI             \\
+\end{tabularx} 
+
+\end{document}

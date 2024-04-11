@@ -1,0 +1,23 @@
+\pgfplotsset{compat=1.15}
+\definecolor{qqwuqq}{rgb}{0.,0.39215686274509803,0.}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1.0cm,y=1.0cm]
+\begin{axis}[
+x=1.0cm,y=1.0cm,
+axis lines=middle,
+ymajorgrids=true,
+xmajorgrids=true,
+xmin=-4.0,
+xmax=4.0,
+ymin=-2.0,
+ymax=2.0,
+xtick={-4.0,-3.0,...,4.0},
+ytick={-2.0,-1.0,...,2.0},]
+\clip(-4.,-2.) rectangle (4.,2.);
+\draw[line width=2.pt,color=qqwuqq,smooth,samples=100,domain=-4.0:4.0] plot(\x,{sin(((\x))*180/pi)});
+\draw [rotate around={0.:(0.,0.)},line width=2.pt] (0.,0.) ellipse (4.cm and 2.cm);
+\begin{scriptsize}
+\draw[color=qqwuqq] (-15.72,0.23) node {$f$};
+\draw[color=black] (-1.82,1.47) node {$eq1$};
+\end{scriptsize}
+\end{axis}
+\end{tikzpicture}

@@ -1,0 +1,33 @@
+\documentclass[aspectratio=169, 11pt]{beamer} % для экранов 16:9 оставить
+% \usepackage[mode=buildnew]{standalone}
+\input{config.tex}
+\input{preamble/packages.tex}
+\input{preamble/xelatexs.tex}
+\input{preamble/flowcharts.tex}
+\input{preamble/beamer.tex}
+\input{preamble/settings.tex}
+
+\institute[\university]{\university \\ \faculty}
+\title[\docname]{\docname}
+\author[\studentname]{\small Made by: student of grp. \group \ \studentname}
+\date{\the\year} 
+
+\usepackage[logo, darktherm, useprogressbar]{mybeamer}
+
+\newcommand{\showHighlightedSectionFrame}{%
+  \begin{frame}{Table of contents}%
+    \tableofcontents[currentsection,hideallsubsections]%
+  \end{frame}%
+  }%
+
+\newtheorem*{remark}{Remark}
+
+\newcommand\Warning{%
+ \makebox[1.4em][c]{%
+ \makebox[0pt][c]{\color{cscorange}\raisebox{.1em}{\small!}}%
+ \makebox[0pt][c]{\color{cscorange}\Large$\bigtriangleup$}}
+ }%
+
+\begin{document} 
+\input{content.tex}
+\end{document}

@@ -1,0 +1,22 @@
+\usepackage{tikz}
+
+\usetikzlibrary{calc, shapes.geometric, arrows, automata, positioning}
+\usetikzlibrary{external}
+\tikzexternalize[prefix=graphics/cache/,optimize command away=\includepdf] % activate! % здесь можно указать отдельную папку для скомпилированных файлов
+
+% \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+% \tikzstyle{io} = [trapezium, trapezium left angle=60, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+% \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+% \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+% \tikzstyle{arrow} = [thick,->,>=stealth]
+% \tikzstyle{sttr} = [rectangle, minimum width=3cm, minimum height=1cm, draw=black!1, fill=black!1]
+% \tikzstyle{sttr1} = [rectangle, minimum width=3cm, minimum height=0.001cm, draw=black, fill=black]
+
+% \definecolor{zzttqq}{rgb}{0.6,0.2,0.}
+% \definecolor{xdxdff}{rgb}{0.49019607843137253,0.49019607843137253,1.}
+% \definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1.}
+\usetikzlibrary {shapes, arrows.meta,automata,positioning,quotes} 
+% \tikzstyle{status} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, font=\tiny]
+\tikzstyle{status} = [rectangle, minimum width=1cm, minimum height=0.5cm, text centered, draw=black, font=\tiny]
+\tikzstyle{con_act} = [state with output, draw=none, font=\tiny]
+\usepackage[simplified]{pgf-umlcd}
